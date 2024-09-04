@@ -1,0 +1,2 @@
+pip install Flask SQLAlchemy marshmallow flask-marshmallow Flask-SQLAlchemy Flask-Caching mysql-connector-python marshmallow-sqlalchemy circuitbreaker Flask-Limiter
+pip freeze > requirements.txt
