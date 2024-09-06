@@ -1,2 +1,129 @@
-pip install Flask SQLAlchemy marshmallow flask-marshmallow Flask-SQLAlchemy Flask-Caching mysql-connector-python marshmallow-sqlalchemy circuitbreaker Flask-Limiter
-pip freeze > requirements.txt
+About:
+        In Factory Management, you will find several files that control this API, making for a modular design perfect for readability, 
+    navigation, and debugging purposes. Each file has a purpose specified by its name. Within each folder, each table of the database has a 
+    file that is specific to that folder’s purpose. With its RESTful API design, it is easy to scale this program to whatever the user needs for 
+    their growing business. I have used SQLAlchemy to help with API calls and validation of data so that no stone is left unturned. I have also 
+    implemented caching and limiters to ensure that information can be accessed quickly and easily by storing it locally. The limiters I have 
+    installed ensure that the API doesn’t get overwhelmed and crash due to high traffic or strain.
+
+        There are five groups of endpoints that the user can interact with: customer, employee, product, production, and order. All five groups can 
+    create/add and view data at this point in the program’s design. The only endpoint that will stand out to you is “view orders.” I have set up 
+    this endpoint to present all of the customer’s information and products ordered, including a total for each item ordered and the total amount 
+    spent on that order. This allows the front-end to present the information without needing to parse it.
+
+    Another notable feature within this program is that when adding an item’s production at the end of the day, the stock is automatically 
+    updated to reflect that information by calling an instance of that product and changing the quantity available. The same happens when you 
+    add an order; the stock is automatically decreased.
+
+        If you want to play around with this API and see it in action, all you need to do is set up a database in MySQL Workbench and enter your 
+    password into config.py under SQLALCHEMY_DATABASE_URI. Then, return to README.MD and follow the Postman link once you have the program up 
+    and running from app.py.
+    
+        Folders Explanation:
+
+            Controllers:
+                    Controllers are where all the data is reviewed using SQLAlchemy to serialize and deserialize data that is given to and received 
+                from the database, ensuring the data submitted is in the correct format. When the information doesn’t meet the requirements, 
+                implemented error handling lets the user know where they went wrong.
+
+            Models:
+                    Models lay out each table’s columns, rows, and relationships with other tables to grant access to that information. They also 
+                tell the database what kind of information it is looking for, whether it be a string, integer, list, or dictionary. Additionally, 
+                they can set restrictions on how long or short the data can be for each row, ensuring that the user enters the correct information.
+
+                Schemas:
+                    Schemas is a subfolder of Models where the controller checks its data against a schema (model or template) to see if the 
+                    information matches the columns for that table. 
+
+            Routes:
+                    Routes specify how the URL should look to find the endpoint for the specified operation you want to perform. Each blueprint can 
+                hold several routes, allowing for insertion, selection, deletion, and modification of information within the database.
+
+            Services:
+                    Services is where all the ‘magic’ happens. All the data is validated and meticulously reviewed to ensure that when tables share 
+                information, it is indeed the correct type of information to be associated with one another. For instance, a product’s stock is 
+                automatically updated when the day’s production is entered at the end of the day. Data can be parsed and modified within services.
+
+PIP Installs:
+    Refer to requirements.txt
+
+Questions:
+  Building a Modular Factory Management System with Flask
+  Objective: The aim of this assignment is to develop a modular factory management system using Flask, incorporating the 
+  Factory Application Pattern, Flask Blueprints for modular design, and implementing API throttling and rate limiting with Flask-Limiter. 
+  This assignment will help students understand how to structure large Flask applications, improve code organization, and manage API access 
+  efficiently.
+
+  Problem Statement: You are tasked with building a comprehensive factory management system that can handle various aspects of 
+  factory operations, including managing employees, tracking production, and monitoring inventory. To ensure scalability and maintainability, 
+  you need to implement the Factory Application Pattern for configuration and implementation, utilize Flask Blueprints for modular design, and 
+  incorporate API throttling and rate limiting using Flask-Limiter. Use the following Models as a base.
+
+  # models.py
+
+  from flask_sqlalchemy import SQLAlchemy
+
+  db = SQLAlchemy()
+
+  class Employee(db.Model):
+      __tablename__ = 'employees'
+      id = db.Column(db.Integer, primary_key=True)
+      name = db.Column(db.String(100), nullable=False)
+      position = db.Column(db.String(100), nullable=False)
+
+  class Product(db.Model):
+      __tablename__ = 'products'
+      id = db.Column(db.Integer, primary_key=True)
+      name = db.Column(db.String(100), nullable=False)
+      price = db.Column(db.Float, nullable=False)
+
+  class Order(db.Model):
+      __tablename__ = 'orders'
+      id = db.Column(db.Integer, primary_key=True)
+      customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
+      product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+      quantity = db.Column(db.Integer, nullable=False)
+      total_price = db.Column(db.Float, nullable=False)
+
+  class Customer(db.Model):
+      __tablename__ = 'customers'
+      id = db.Column(db.Integer, primary_key=True)
+      name = db.Column(db.String(100), nullable=False)
+      email = db.Column(db.String(100), nullable=False)
+      phone = db.Column(db.String(20), nullable=False)
+
+  class Production(db.Model):
+      __tablename__ = 'production'
+      id = db.Column(db.Integer, primary_key=True)
+      product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+      quantity_produced = db.Column(db.Integer, nullable=False)
+      date_produced = db.Column(db.Date, nullable=False)
+
+  Task 1: Implement Factory Application Pattern
+  Configure the Flask application using the Factory Application Pattern to enable easy configuration and instantiation of the application.
+  Organize the application structure into modules for better code organization and maintainability.
+
+  Task 2: Utilize Flask Blueprints for Modular Design
+  Create Flask Blueprints to modularize different aspects of the factory management system, such as employee management, production tracking, 
+  and inventory monitoring.
+  Register these Blueprints with the Flask application to enable modularity and separation of concerns.
+
+  Task 3: Implement API Throttling and Rate Limiting
+  Integrate Flask-Limiter into the application to implement API throttling and rate limiting functionality.
+  Configure rate limits for different API endpoints to prevent abuse and ensure fair usage of resources.
+  Task 4: Create Endpoints for CRUD Operations
+
+  For each model (Employee, Product, Order, Customer, and Production), create endpoints for performing Create and Fetching All operations.
+  Use the REST Resource Naming Conventions to design the endpoint URLs and methods.
+  Ensure that the endpoints adhere to the principles of RESTful API design, including the use of nouns for resource names, plural nouns for 
+  collection names, hyphens to separate words, and lowercase letters.
+
+  Expected Outcomes:
+
+  Successful implementation of the Factory Application Pattern for configuration and instantiation of the Flask application, enhancing scalability 
+  and maintainability.
+  Utilization of Flask Blueprints to modularize different components of the factory management system, improving code organization and separation 
+  of concerns.
+  Implementation of API throttling and rate limiting using Flask-Limiter to manage API access efficiently and prevent abuse of resources.
+  Creation of endpoints for Create and List All operations for each model in the factory management system, following the principles of RESTful 
+  API design and adhering to REST Resource Naming Conventions.
