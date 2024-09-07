@@ -4,8 +4,6 @@ from caching import cache
 from database import db
 
 from models.schemas.orderSchema import order_schema,orders_schema
-from models.product import Product
-from models.orderProduct import order_product
 
 from services import orderService
 
@@ -24,42 +22,31 @@ def save():
   
 @cache.cached(timeout=60)
 def find_all():
-  orders_data = orderService.find_all()
-  orders = []
-  for order in orders_data:
-    total = 0
-    order_data = {
-        'order_id': order.id,
-        'order_date': order.date,
-        'customer': {
-            'customer_id': order.customer.id,
-            'name': order.customer.name,
-            'email': order.customer.email,
-            'phone': order.customer.phone
+  orders = orderService.find_all()
+  all_orders = []
+  total = 0
+  for order in orders:
+    order_details={
+      "order_id": order.id,
+      "date": order.date,
+      'customer_info': {
+        'name': order.customer.name,
+        'email': order.customer.email,
+        'phone': order.customer.phone
         },
-        'products': [],
-        'total': []
+      'products':[],
+      'total_cost':[]
     }
-    results = db.session.query(
-        Product.id,
-        Product.name,
-        Product.price,
-        order_product.c.quantity
-    ).join(order_product, Product.id == order_product.c.product_id).filter(order_product.c.order_id == order.id).all()
-    
-    cart_total = 0 
-    total += cart_total
-    for product_id, name, price, quantity in results:
-      product_data = {
-          'product_id': product_id,
-          'name': name,
-          'price': price,
-          'quantity': quantity,
-          'item_total': price * quantity
+    for product in order.products:
+      product_details={
+        'product_id': product.product_id,
+        'name': product.product.name,
+        'price': product.product.price,
+        'quantity': product.quantity,
+        'product_total_cost': round(product.quantity * product.product.price,2)
       }
-      
-      total += product_data['item_total']
-      order_data['products'].append(product_data)
-    order_data['total'].append(total)
-    orders.append(order_data)   
-  return jsonify(orders)
+      order_details['products'].append(product_details)
+      total+= product.quantity * product.product.price
+    order_details['total_cost'].append(round(total*0.09+total,2))
+    all_orders.append(order_details)
+  return jsonify(all_orders)

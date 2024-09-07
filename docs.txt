@@ -9,7 +9,7 @@ About:
         There are five groups of endpoints that the user can interact with: customer, employee, product, production, and order. All five groups can 
     create/add and view data at this point in the program’s design. The only endpoint that will stand out to you is “view orders.” I have set up 
     this endpoint to present all of the customer’s information and products ordered, including a total for each item ordered and the total amount 
-    spent on that order. This allows the front-end to present the information without needing to parse it.
+    with tax (9%) spent on that order. This allows the front-end to present the information without needing to parse it.
 
     Another notable feature within this program is that when adding an item’s production at the end of the day, the stock is automatically 
     updated to reflect that information by calling an instance of that product and changing the quantity available. The same happens when you 

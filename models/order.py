@@ -1,8 +1,7 @@
-from typing import List, Dict
+from typing import List
 from database import db, Base
 import datetime
 from sqlalchemy.orm import Mapped, mapped_column
-from models.orderProduct import order_product
 
 class Order(Base):
   __tablename__ = 'Orders'
@@ -11,5 +10,4 @@ class Order(Base):
   date: Mapped[datetime.date] = mapped_column(db.Date,nullable=False)
   
   customer: Mapped["Customer"] = db.relationship(back_populates="orders")
-  products: Mapped[List["Product"]] = db.relationship(secondary=order_product,back_populates='orders')
-  
+  products: Mapped[List["OrderProducts"]] = db.relationship('OrderProducts', back_populates='order')

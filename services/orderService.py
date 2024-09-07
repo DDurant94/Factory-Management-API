@@ -5,13 +5,12 @@ from database import db
 from models.order import Order
 from models.customer import Customer
 from models.product import Product
-from models.orderProduct import order_product
+from models.orderProduct import OrderProducts
 
 def save(order_data):
   with Session(db.engine) as session:
     with session.begin():
       product_ids = [product['product_id'] for product in order_data['products']]
-      quantities = {product['product_id']: product['quantity'] for product in order_data['products']}
       
       products = session.execute(select(Product).where(Product.id.in_(product_ids))).scalars().all()
       
@@ -24,19 +23,21 @@ def save(order_data):
       if not customer:
         raise ValueError(f"Customer with ID {customer_id} does not exist")
       
-      new_order = Order(date=order_data['date'], customer_id=customer_id)
+      new_order = Order(date=order_data['date'], customer_id=customer_id,products=[])
       session.add(new_order)
       session.flush()
       
-      for product in products:
-        update_product = session.execute(select(Product).where(Product.id==product.id)).scalars().first()
-        update_product.id=update_product.id 
-        update_product.name=update_product.name
-        update_product.price=update_product.price
-        update_product.quantity= product.quantity - quantities[product.id]
-        
-        session.execute(order_product.insert().values(order_id=new_order.id, product_id=product.id, quantity=quantities[product.id]))
-        
+      for product_data in order_data['products']:
+        product_id = product_data['product_id']
+        quantity = product_data['quantity']
+        order_products = OrderProducts(order_id=new_order.id, product_id=product_id,quantity= quantity)
+        product = session.execute(select(Product).where(Product.id == product_id)).scalars().first()
+        product.id=product.id 
+        product.name=product.name
+        product.price=product.price
+        product.quantity= product.quantity - quantity
+        session.add(order_products)
+        new_order.products.append(order_products) 
       session.commit()
       session.flush()
     session.refresh(new_order)

@@ -9,7 +9,7 @@ from models.order import Order
 from models.product import Product
 from models.employee import Employee
 from models.production import Production
-from models.orderProduct import order_product
+from models.orderProduct import OrderProducts
 
 from routes.customerBP import customer_blueprint
 from routes.orderBP import order_blueprint
@@ -52,7 +52,6 @@ if __name__ == '__main__':
   configure_rate_limit()
   
   with app.app_context():
-    db.drop_all()
     db.create_all()
     
   app.run(debug=True)
